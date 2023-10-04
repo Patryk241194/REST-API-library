@@ -28,7 +28,7 @@ public class Borrowing {
     @JoinColumn(name = "READER_ID")
     private Reader reader;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BOOK_COPY_ID")
     private BookCopy bookCopy;
 

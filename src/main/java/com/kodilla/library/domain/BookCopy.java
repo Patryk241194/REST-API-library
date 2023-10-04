@@ -24,18 +24,13 @@ public class BookCopy {
     private Long id;
     private String status;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TITLE_ID")
     private BookTitle title;
 
-    @OneToMany(
-            targetEntity = Borrowing.class,
-            mappedBy = "bookCopy",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
-    )
-    @Builder.Default
-    private List<Borrowing> borrowings = new ArrayList<>();
+    @OneToOne(mappedBy = "bookCopy", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Borrowing borrowing;
 
     @Override
     public boolean equals(Object o) {
