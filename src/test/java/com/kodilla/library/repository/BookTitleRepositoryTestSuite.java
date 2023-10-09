@@ -1,16 +1,20 @@
 package com.kodilla.library.repository;
 
-import com.kodilla.library.domain.BookCopy;
-import com.kodilla.library.domain.BookTitle;
+import com.kodilla.library.domain.bookcopy.BookCopy;
+import com.kodilla.library.domain.booktitle.BookTitle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.transaction.Transactional;
+
+import static com.kodilla.library.domain.bookcopy.CopyStatus.AVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
+@Transactional
 public class BookTitleRepositoryTestSuite {
 
     @Autowired
@@ -26,7 +30,6 @@ public class BookTitleRepositoryTestSuite {
         bookTitle = BookTitle.builder()
                 .title("Sample Title")
                 .author("Sample Author")
-                .publicationYear(2022)
                 .build();
 
         bookTitleRepository.save(bookTitle);
@@ -40,25 +43,21 @@ public class BookTitleRepositoryTestSuite {
         // Then
         assertEquals(bookTitle, foundBookTitle);
 
-        // CleanUp
-        bookTitleRepository.deleteById(bookTitle.getId());
 
     }
 
     @Test
     void bookTitleRepositoryUpdateTestSuite() {
         // Given
-        int newPublicationYear = 2019;
+        String newTitle = "Updated Title";
 
         // When
-        bookTitle.setPublicationYear(newPublicationYear);
+        bookTitle.setTitle(newTitle);
         bookTitleRepository.save(bookTitle);
 
         // Then
         BookTitle updatedBookTitle = bookTitleRepository.findById(bookTitle.getId()).orElse(null);
-        assertEquals(newPublicationYear, updatedBookTitle.getPublicationYear());
-
-        // CleanUp
+        assertEquals(newTitle, updatedBookTitle.getTitle());
 
     }
 
@@ -76,21 +75,17 @@ public class BookTitleRepositoryTestSuite {
     @Test
     void oneToManyRelationBetweenBookTitleAndBookCopyTestSuite() {
         // Given
-        BookTitle bookTitle = BookTitle.builder()
-                .title("Sample Title")
-                .author("Sample Author")
-                .publicationYear(2022)
-                .build();
-        bookTitleRepository.save(bookTitle);
 
         BookCopy bookCopy1 = BookCopy.builder()
-                .status("Available")
+                .status(AVAILABLE)
+                .publicationYear(2022)
                 .title(bookTitle)
                 .build();
         bookCopyRepository.save(bookCopy1);
 
         BookCopy bookCopy2 = BookCopy.builder()
-                .status("Available")
+                .status(AVAILABLE)
+                .publicationYear(2019)
                 .title(bookTitle)
                 .build();
         bookCopyRepository.save(bookCopy2);
@@ -104,7 +99,6 @@ public class BookTitleRepositoryTestSuite {
         assertEquals(bookCopy1.getTitle().getTitle(), bookTitle.getTitle());
         assertEquals(bookCopy2.getTitle().getTitle(), bookTitle.getTitle());
 
-        // CleanUp
-        bookTitleRepository.deleteById(bookTitle.getId());
     }
+
 }

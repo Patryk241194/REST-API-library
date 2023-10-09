@@ -1,19 +1,22 @@
 package com.kodilla.library.repository;
 
-import com.kodilla.library.domain.BookCopy;
-import com.kodilla.library.domain.BookTitle;
-import com.kodilla.library.domain.Borrowing;
-import com.kodilla.library.domain.Reader;
+import com.kodilla.library.domain.bookcopy.BookCopy;
+import com.kodilla.library.domain.booktitle.BookTitle;
+import com.kodilla.library.domain.borrowing.Borrowing;
+import com.kodilla.library.domain.reader.Reader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 
+import static com.kodilla.library.domain.bookcopy.CopyStatus.AVAILABLE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 public class ReaderRepositoryTestSuite {
 
     @Autowired
@@ -46,15 +49,12 @@ public class ReaderRepositoryTestSuite {
         // Then
         assertEquals(reader, foundReader);
 
-        // CleanUp
-        readerRepository.deleteById(reader.getId());
-
     }
 
     @Test
     void readerRepositoryUpdateTestSuite() {
         // Given
-        LocalDate newCreatedDate = LocalDate.now().minusDays(2);
+        LocalDate newCreatedDate = LocalDate.of(2008, 10, 21);
 
         // When
         reader.setRegistrationDate(newCreatedDate);
@@ -63,9 +63,6 @@ public class ReaderRepositoryTestSuite {
         // Then
         Reader updatedReader = readerRepository.findById(reader.getId()).orElse(null);
         assertEquals(newCreatedDate, updatedReader.getRegistrationDate());
-
-        // CleanUp
-        readerRepository.deleteById(reader.getId());
 
     }
 
@@ -86,18 +83,19 @@ public class ReaderRepositoryTestSuite {
         BookTitle bookTitle = BookTitle.builder()
                 .title("Sample Title")
                 .author("Sample Author")
-                .publicationYear(2022)
                 .build();
         bookTitleRepository.save(bookTitle);
 
         BookCopy bookCopy1 = BookCopy.builder()
-                .status("Available")
+                .status(AVAILABLE)
+                .publicationYear(2022)
                 .title(bookTitle)
                 .build();
         bookCopyRepository.save(bookCopy1);
 
         BookCopy bookCopy2 = BookCopy.builder()
-                .status("Available")
+                .status(AVAILABLE)
+                .publicationYear(2019)
                 .title(bookTitle)
                 .build();
         bookCopyRepository.save(bookCopy2);
@@ -136,9 +134,7 @@ public class ReaderRepositoryTestSuite {
         assertEquals(borrowing1.getId(), bookCopy1.getBorrowing().getId());
         assertEquals(borrowing2.getId(), bookCopy2.getBorrowing().getId());
 
-        // CleanUp
-        readerRepository.deleteById(reader.getId());
-        bookTitleRepository.deleteById(bookTitle.getId());
 
     }
+
 }

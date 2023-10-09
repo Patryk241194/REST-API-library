@@ -1,10 +1,10 @@
 package com.kodilla.library.dto;
 
+import com.kodilla.library.domain.bookcopy.CopyStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
+import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
@@ -12,7 +12,8 @@ import java.util.List;
 public class BookCopyDto {
     private Long id;
     private Long titleId;
-    private String status;
+    private CopyStatus status;
+    private int publicationYear;
     private Long borrowingId;
 
 }

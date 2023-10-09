@@ -1,22 +1,23 @@
 package com.kodilla.library.mapper;
 
-import com.kodilla.library.domain.Borrowing;
-import com.kodilla.library.domain.Reader;
+import com.kodilla.library.domain.borrowing.Borrowing;
+import com.kodilla.library.domain.reader.Reader;
 import com.kodilla.library.dto.ReaderDto;
 import com.kodilla.library.service.BorrowingService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class ReaderMapper {
+public class ReaderMapper implements Mapper<ReaderDto, Reader> {
 
     private final BorrowingService borrowingService;
 
-    public Reader mapToReader(final ReaderDto readerDto) {
+    public Reader mapToEntity(final ReaderDto readerDto) {
 
         return new Reader(
                 readerDto.getId(),
@@ -27,12 +28,10 @@ public class ReaderMapper {
         );
     }
 
-    public ReaderDto mapToReaderDto(final Reader reader) {
-
-        List<Long> borrowingIds = reader.getBorrowings()
-                .stream()
-                .map(Borrowing::getId)
-                .collect(Collectors.toList());
+    public ReaderDto mapToDto(final Reader reader) {
+        List<Long> borrowingIds = (reader.getBorrowings() != null)
+                ? reader.getBorrowings().stream().map(Borrowing::getId).collect(Collectors.toList())
+                : null;
 
         return new ReaderDto(
                 reader.getId(),

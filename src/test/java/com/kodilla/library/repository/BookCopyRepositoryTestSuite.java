@@ -1,9 +1,8 @@
 package com.kodilla.library.repository;
 
-import com.kodilla.library.domain.BookCopy;
-import com.kodilla.library.domain.BookTitle;
-import com.kodilla.library.domain.Borrowing;
-import com.kodilla.library.domain.Reader;
+import com.kodilla.library.domain.bookcopy.BookCopy;
+import com.kodilla.library.domain.bookcopy.CopyStatus;
+import com.kodilla.library.domain.booktitle.BookTitle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.transaction.Transactional;
 
-import java.time.LocalDate;
-
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static com.kodilla.library.domain.bookcopy.CopyStatus.AVAILABLE;
+import static com.kodilla.library.domain.bookcopy.CopyStatus.BORROWED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
+@Transactional
 public class BookCopyRepositoryTestSuite {
 
     @Autowired
@@ -32,12 +31,12 @@ public class BookCopyRepositoryTestSuite {
         BookTitle bookTitle = BookTitle.builder()
                 .title("Sample Title")
                 .author("Sample Author")
-                .publicationYear(2022)
                 .build();
         bookTitleRepository.save(bookTitle);
 
         bookCopy = BookCopy.builder()
-                .status("Available")
+                .status(AVAILABLE)
+                .publicationYear(2022)
                 .title(bookTitle)
                 .build();
         bookCopyRepository.save(bookCopy);
@@ -52,15 +51,12 @@ public class BookCopyRepositoryTestSuite {
         // Then
         assertEquals(bookCopy, foundBookCopy);
 
-        // CleanUp
-        bookTitleRepository.deleteById(bookCopy.getId());
-
     }
 
     @Test
     void bookCopyRepositoryUpdateTestSuite() {
         // Given
-        String newStatus = "Borrowed";
+        CopyStatus newStatus = BORROWED;
 
         // When
         bookCopy.setStatus(newStatus);
@@ -69,9 +65,6 @@ public class BookCopyRepositoryTestSuite {
         // Then
         BookCopy updatedBookCopy = bookCopyRepository.findById(bookCopy.getId()).orElse(null);
         assertEquals(newStatus, updatedBookCopy.getStatus());
-
-        // CleanUp
-        bookTitleRepository.deleteById(bookCopy.getId());
 
     }
 
@@ -84,8 +77,6 @@ public class BookCopyRepositoryTestSuite {
         // Then
         assertFalse(bookCopyRepository.existsById(id));
 
-        // CleanUp
-        bookTitleRepository.deleteById(bookCopy.getId());
-
     }
+
 }

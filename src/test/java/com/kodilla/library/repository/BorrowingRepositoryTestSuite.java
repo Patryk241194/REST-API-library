@@ -1,20 +1,23 @@
 package com.kodilla.library.repository;
 
-import com.kodilla.library.domain.BookCopy;
-import com.kodilla.library.domain.BookTitle;
-import com.kodilla.library.domain.Borrowing;
-import com.kodilla.library.domain.Reader;
+import com.kodilla.library.domain.bookcopy.BookCopy;
+import com.kodilla.library.domain.booktitle.BookTitle;
+import com.kodilla.library.domain.borrowing.Borrowing;
+import com.kodilla.library.domain.reader.Reader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 
+import static com.kodilla.library.domain.bookcopy.CopyStatus.AVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
+@Transactional
 public class BorrowingRepositoryTestSuite {
 
     @Autowired
@@ -41,12 +44,12 @@ public class BorrowingRepositoryTestSuite {
         BookTitle bookTitle = BookTitle.builder()
                 .title("Sample Title")
                 .author("Sample Author")
-                .publicationYear(2022)
                 .build();
         bookTitleRepository.save(bookTitle);
 
         BookCopy bookCopy = BookCopy.builder()
-                .status("Available")
+                .status(AVAILABLE)
+                .publicationYear(2022)
                 .title(bookTitle)
                 .build();
         bookCopyRepository.save(bookCopy);
@@ -69,9 +72,6 @@ public class BorrowingRepositoryTestSuite {
         // Then
         assertEquals(borrowing, foundBorrowing);
 
-        // CleanUp
-        readerRepository.deleteById(borrowing.getReader().getId());
-
     }
 
     @Test
@@ -87,9 +87,6 @@ public class BorrowingRepositoryTestSuite {
         Borrowing updatedBorrowing = borrowingRepository.findById(borrowing.getId()).orElse(null);
         assertEquals(newReturnDate, updatedBorrowing.getReturnDate());
 
-        // CleanUp
-        readerRepository.deleteById(borrowing.getReader().getId());
-
     }
 
     @Test
@@ -97,13 +94,19 @@ public class BorrowingRepositoryTestSuite {
         // When
         Long id = borrowing.getId();
         Long readerId = borrowing.getReader().getId();
-        borrowingRepository.deleteById(borrowing.getId());
+        borrowingRepository.deleteById(id);
 
         // Then
         assertFalse(borrowingRepository.existsById(id));
 
-        // CleanUp
-        readerRepository.deleteById(readerId);
-
     }
+
+    @Test
+    void cleanUp() {
+        readerRepository.deleteAll();
+        bookTitleRepository.deleteAll();
+    }
+
 }
+
+

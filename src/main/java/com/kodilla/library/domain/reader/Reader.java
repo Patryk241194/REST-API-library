@@ -1,5 +1,6 @@
-package com.kodilla.library.domain;
+package com.kodilla.library.domain.reader;
 
+import com.kodilla.library.domain.borrowing.Borrowing;
 import lombok.*;
 
 import javax.persistence.CascadeType;
@@ -39,6 +40,7 @@ public class Reader {
             targetEntity = Borrowing.class,
             mappedBy = "reader",
             cascade = CascadeType.ALL,
+            orphanRemoval = true,
             fetch = FetchType.LAZY
     )
     @Builder.Default

@@ -1,6 +1,6 @@
 package com.kodilla.library.mapper;
 
-import com.kodilla.library.domain.Borrowing;
+import com.kodilla.library.domain.borrowing.Borrowing;
 import com.kodilla.library.dto.BorrowingDto;
 import com.kodilla.library.service.BookCopyService;
 import com.kodilla.library.service.ReaderService;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class BorrowingMapper {
+public class BorrowingMapper implements Mapper<BorrowingDto, Borrowing> {
 
     private final ReaderService readerService;
     private final BookCopyService bookCopyService;
 
-    public Borrowing mapToBorrowing(BorrowingDto borrowingDto) {
+    public Borrowing mapToEntity(BorrowingDto borrowingDto) {
 
         return new Borrowing(
                 borrowingDto.getId(),
@@ -26,7 +26,7 @@ public class BorrowingMapper {
         );
     }
 
-    public BorrowingDto mapToBorrowingDto(Borrowing borrowing) {
+    public BorrowingDto mapToDto(Borrowing borrowing) {
 
         return new BorrowingDto(
                 borrowing.getId(),

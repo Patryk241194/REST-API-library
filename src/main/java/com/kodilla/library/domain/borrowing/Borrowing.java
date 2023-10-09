@@ -1,5 +1,7 @@
-package com.kodilla.library.domain;
+package com.kodilla.library.domain.borrowing;
 
+import com.kodilla.library.domain.reader.Reader;
+import com.kodilla.library.domain.bookcopy.BookCopy;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,11 +26,11 @@ public class Borrowing {
     private LocalDate borrowingDate;
     private LocalDate returnDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "READER_ID")
     private Reader reader;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "BOOK_COPY_ID")
     private BookCopy bookCopy;
 
