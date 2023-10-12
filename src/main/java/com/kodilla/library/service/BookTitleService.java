@@ -62,4 +62,8 @@ public class BookTitleService {
 
         return bookTitleRepository.save(bookTitle);
     }
+
+    public BookTitle findLatestBookTitleId() {
+        return bookTitleRepository.findFirstByOrderByIdDesc().orElseThrow(BookTitleNotFoundException::new);
+    }
 }

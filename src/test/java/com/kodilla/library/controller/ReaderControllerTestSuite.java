@@ -2,7 +2,7 @@ package com.kodilla.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kodilla.library.domain.reader.Reader;
-import com.kodilla.library.repository.ReaderRepository;
+import com.kodilla.library.dto.ReaderDto;
 import com.kodilla.library.service.ReaderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,11 +32,11 @@ class ReaderControllerTestSuite {
     private ObjectMapper objectMapper;
     @Autowired
     private ReaderService readerService;
-
     private Reader reader;
+    private ReaderDto readerDto;
 
-    private Reader createSampleReader() {
-        return Reader.builder()
+    private ReaderDto createSampleReaderDto() {
+        return ReaderDto.builder()
                 .firstName("John")
                 .lastName("Smith")
                 .registrationDate(LocalDate.now())
@@ -45,10 +45,10 @@ class ReaderControllerTestSuite {
 
     @BeforeEach
     void setUp() throws Exception {
-        reader = createSampleReader();
+        readerDto = createSampleReaderDto();
         mockMvc.perform(post("/api/readers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(reader)))
+                        .content(objectMapper.writeValueAsString(readerDto)))
                 .andExpect(status().isOk());
 
         List<Reader> readers = readerService.getAllReaders();

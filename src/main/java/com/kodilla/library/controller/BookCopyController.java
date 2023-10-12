@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
+import com.kodilla.library.domain.booktitle.BookTitle;
 import com.kodilla.library.dto.BookCopyDto;
 import com.kodilla.library.mapper.Mapper;
 import com.kodilla.library.service.BookCopyService;
+import com.kodilla.library.service.BookTitleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -25,6 +27,7 @@ public class BookCopyController {
 
     private final Mapper<BookCopyDto, BookCopy> mapper;
     private final BookCopyService service;
+    private final BookTitleService bookTitleService;
 
     @GetMapping
     public ResponseEntity<List<BookCopyDto>> getAllBookCopies() {

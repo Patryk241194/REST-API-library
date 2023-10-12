@@ -83,8 +83,9 @@ public class BorrowingService {
 
         borrowing.setBorrowingDate(LocalDate.now());
         bookCopy.setStatus(CopyStatus.BORROWED);
-        borrowingRepository.save(borrowing);
         bookCopyRepository.save(bookCopy);
+        borrowingRepository.save(borrowing);
+
     }
 
     public String returnBook(Long borrowingId, CopyStatus status) {

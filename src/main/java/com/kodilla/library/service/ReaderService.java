@@ -91,4 +91,9 @@ public class ReaderService {
 
         return readerRepository.save(reader);
     }
+
+    public Reader findLatestReaderId() {
+        return readerRepository.findFirstByOrderByIdDesc()
+                .orElseThrow(ReaderNotFoundException::new);
+    }
 }

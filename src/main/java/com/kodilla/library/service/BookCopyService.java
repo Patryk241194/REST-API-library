@@ -82,4 +82,9 @@ public class BookCopyService {
         bookCopy.setStatus(status);
         bookCopyRepository.save(bookCopy);
     }
+
+    public BookCopy findLatestBookCopyId() {
+        return bookCopyRepository.findFirstByOrderByIdDesc()
+                .orElseThrow(BookCopyNotFoundException::new);
+    }
 }

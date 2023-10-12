@@ -34,7 +34,7 @@ public class BookCopy {
 
     @OneToOne(
             mappedBy = "bookCopy",
-            cascade = CascadeType.REMOVE,
+            cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
     private Borrowing borrowing;

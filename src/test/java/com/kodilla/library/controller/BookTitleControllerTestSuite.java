@@ -2,7 +2,7 @@ package com.kodilla.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kodilla.library.domain.booktitle.BookTitle;
-import com.kodilla.library.repository.BookTitleRepository;
+import com.kodilla.library.dto.BookTitleDto;
 import com.kodilla.library.service.BookTitleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,11 +33,11 @@ class BookTitleControllerTestSuite {
     private ObjectMapper objectMapper;
     @Autowired
     private BookTitleService bookTitleService;
-
     private BookTitle bookTitle;
+    private BookTitleDto bookTitleDto;
 
-    private BookTitle createSampleBookTitle() {
-        return BookTitle.builder()
+    private BookTitleDto createSampleBookTitleDto() {
+        return BookTitleDto.builder()
                 .title("Sample Title")
                 .author("Sample Author")
                 .build();
@@ -45,10 +45,10 @@ class BookTitleControllerTestSuite {
 
     @BeforeEach
     void setUp() throws Exception {
-        bookTitle = createSampleBookTitle();
+        bookTitleDto = createSampleBookTitleDto();
         mockMvc.perform(post("/api/booktitles")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookTitle)))
+                        .content(objectMapper.writeValueAsString(bookTitleDto)))
                 .andExpect(status().isOk());
 
         List<BookTitle> bookTitles = bookTitleService.getAllBookTitles();

@@ -3,8 +3,10 @@ package com.kodilla.library.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
-import com.kodilla.library.domain.booktitle.BookTitle;
+import com.kodilla.library.dto.BookCopyDto;
+import com.kodilla.library.dto.BookTitleDto;
 import com.kodilla.library.service.BookCopyService;
+import com.kodilla.library.service.BookTitleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,37 +35,40 @@ class BookCopyControllerTestSuite {
     private ObjectMapper objectMapper;
     @Autowired
     private BookCopyService bookCopyService;
-
+    @Autowired
+    private BookTitleService bookTitleService;
     private BookCopy bookCopy;
-    private BookTitle bookTitle;
+    private BookCopyDto bookCopyDto;
 
-    private BookTitle createSampleBookTitle() {
-        return BookTitle.builder()
+    private BookTitleDto createSampleBookTitleDto() {
+        return BookTitleDto.builder()
                 .title("Sample Title")
                 .author("Sample Author")
                 .build();
     }
 
-    private BookCopy createSampleBookCopy() {
-        return BookCopy.builder()
+    private BookCopyDto createSampleBookCopyDto(Long bookTitleId) {
+        return BookCopyDto.builder()
                 .status(CopyStatus.AVAILABLE)
                 .publicationYear(2023)
-                .title(bookTitle)
+                .titleId(bookTitleId)
                 .build();
     }
 
     @BeforeEach
     void setUp() throws Exception {
-        bookTitle = createSampleBookTitle();
+        BookTitleDto bookTitleDto = createSampleBookTitleDto();
         mockMvc.perform(post("/api/booktitles")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookTitle)))
+                        .content(objectMapper.writeValueAsString(bookTitleDto)))
                 .andExpect(status().isOk());
 
-        bookCopy = createSampleBookCopy();
+
+        Long id = bookTitleService.findLatestBookTitleId().getId();
+        bookCopyDto = createSampleBookCopyDto(id);
         mockMvc.perform(post("/api/bookcopies")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookCopy)))
+                        .content(objectMapper.writeValueAsString(bookCopyDto)))
                 .andExpect(status().isOk());
 
         List<BookCopy> bookCopies = bookCopyService.getAllBookCopies();
@@ -73,7 +78,7 @@ class BookCopyControllerTestSuite {
     }
 
     @Test
-    void testCreateBookCopy() throws Exception {
+    public void testCreateBookCopy() throws Exception {
         mockMvc.perform(get("/api/bookcopies"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -17,5 +18,7 @@ public interface BookCopyRepository extends CrudRepository<BookCopy, Long> {
     List<BookCopy> findAllByTitle_Id(Long bookTitleId);
 
     BookCopy findBookCopyByBorrowingId(Long borrowingId);
+
+    Optional<BookCopy> findFirstByOrderByIdDesc();
 
 }

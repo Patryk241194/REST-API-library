@@ -21,17 +21,19 @@ public class BorrowingMapper implements Mapper<BorrowingDto, Borrowing> {
                 borrowingDto.getId(),
                 borrowingDto.getBorrowingDate(),
                 borrowingDto.getReturnDate(),
-                (borrowingDto.getReaderId() != null) ? readerService.getReaderByBorrowingId(borrowingDto.getId()) : null,
-                (borrowingDto.getBookCopyId() != null) ? bookCopyService.getBookCopyByBorrowingId(borrowingDto.getId()) : null
+                (borrowingDto.getReaderId() != null) ? readerService.getReaderById(borrowingDto.getReaderId()) : null,
+                (borrowingDto.getBookCopyId() != null) ? bookCopyService.getBookCopyById(borrowingDto.getBookCopyId()) : null
         );
     }
 
     public BorrowingDto mapToDto(Borrowing borrowing) {
+        Long bookCopyId = (borrowing.getBookCopy() != null) ? borrowing.getBookCopy().getId() : null;
+        Long readerId = (borrowing.getReader() != null) ? borrowing.getReader().getId() : null;
 
         return new BorrowingDto(
                 borrowing.getId(),
-                borrowing.getBookCopy().getId(),
-                borrowing.getReader().getId(),
+                bookCopyId,
+                readerId,
                 borrowing.getBorrowingDate(),
                 borrowing.getReturnDate()
         );
