@@ -30,7 +30,7 @@ public class BookTitle {
             mappedBy = "title",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             orphanRemoval = true,
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     @Builder.Default
     private List<BookCopy> copies = new ArrayList<>();

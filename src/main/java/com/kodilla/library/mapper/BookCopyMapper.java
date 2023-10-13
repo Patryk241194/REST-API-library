@@ -1,8 +1,6 @@
 package com.kodilla.library.mapper;
 
 import com.kodilla.library.domain.bookcopy.BookCopy;
-import com.kodilla.library.domain.booktitle.BookTitle;
-import com.kodilla.library.domain.borrowing.Borrowing;
 import com.kodilla.library.dto.BookCopyDto;
 import com.kodilla.library.service.BookTitleService;
 import com.kodilla.library.service.BorrowingService;

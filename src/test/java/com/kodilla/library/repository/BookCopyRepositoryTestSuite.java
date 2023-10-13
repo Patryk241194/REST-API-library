@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 @Transactional
-public class BookCopyRepositoryTestSuite {
+class BookCopyRepositoryTestSuite {
 
     @Autowired
     private BookCopyRepository bookCopyRepository;
@@ -64,6 +64,7 @@ public class BookCopyRepositoryTestSuite {
 
         // Then
         BookCopy updatedBookCopy = bookCopyRepository.findById(bookCopy.getId()).orElse(null);
+        assert updatedBookCopy != null;
         assertEquals(newStatus, updatedBookCopy.getStatus());
 
     }

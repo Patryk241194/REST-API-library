@@ -12,7 +12,7 @@ public class BookCopyDto {
     private Long id;
     private Long titleId;
     private CopyStatus status;
-    private int publicationYear;
+    private Integer publicationYear;
     private Long borrowingId;
 
 }

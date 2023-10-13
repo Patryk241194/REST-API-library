@@ -21,10 +21,6 @@ public class BookTitleService {
         return bookTitleRepository.findAll();
     }
 
-    public List<BookTitle> getAllBookTitlesByBookCopiesId() {
-        return bookTitleRepository.findAll();
-    }
-
     public BookTitle getBookTitleById(final Long bookTitleId) {
         return bookTitleRepository.findById(bookTitleId).orElseThrow(BookTitleNotFoundException::new);
     }

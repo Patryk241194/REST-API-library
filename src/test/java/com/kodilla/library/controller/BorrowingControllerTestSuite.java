@@ -1,6 +1,8 @@
 package com.kodilla.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kodilla.library.annotations.ReaderFunctionalityTest;
+import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
 import com.kodilla.library.domain.borrowing.Borrowing;
 import com.kodilla.library.dto.BookCopyDto;
@@ -24,9 +26,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @Transactional
@@ -103,12 +105,11 @@ class BorrowingControllerTestSuite {
 
         Long readerId = readerService.findLatestReaderId().getId();
         Long bookCopyId = bookCopyService.findLatestBookCopyId().getId();
-        borrowingDto = getSampleBorrowingDto(readerId,bookCopyId);
+        borrowingDto = getSampleBorrowingDto(readerId, bookCopyId);
         mockMvc.perform(post("/api/borrowings/borrow-book")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(borrowingDto)))
                 .andExpect(status().isOk());
-
         List<Borrowing> borrowings = borrowingService.getAllBorrowings();
         if (!borrowings.isEmpty()) {
             borrowing = borrowings.get(0);
@@ -134,11 +135,13 @@ class BorrowingControllerTestSuite {
 
     @Test
     void testUpdateBorrowing() throws Exception {
-        borrowing.setReturnDate(borrowing.getReturnDate().plusDays(3));
+        BorrowingDto updatedBorrowingDto = BorrowingDto.builder()
+                .returnDate(borrowing.getReturnDate().plusDays(3))
+                .build();
 
         mockMvc.perform(patch("/api/borrowings/{borrowingId}", borrowing.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(borrowing)))
+                        .content(objectMapper.writeValueAsString(updatedBorrowingDto)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/borrowings/{borrowingId}", borrowing.getId()))
@@ -154,6 +157,91 @@ class BorrowingControllerTestSuite {
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/borrowings"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void testReturnBookBorrowed() throws Exception {
+        Long borrowingId = borrowing.getId();
+        BookCopy updatedBookCopy = bookCopyService.getBookCopyById(borrowing.getBookCopy().getId());
+
+        mockMvc.perform(post("/api/borrowings/return-book/{borrowingId}", borrowingId))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("The book has been returned and is available.")));
+
+        assertFalse(borrowingService.existsById(borrowingId));
+        assertNotNull(updatedBookCopy);
+        assertEquals(CopyStatus.AVAILABLE, updatedBookCopy.getStatus());
+    }
+
+    @Test
+    void testReturnBookLost() throws Exception {
+        Long borrowingId = borrowing.getId();
+        BookCopy updatedBookCopy = bookCopyService.getBookCopyById(borrowing.getBookCopy().getId());
+
+        mockMvc.perform(post("/api/borrowings/return-book/{borrowingId}", borrowingId)
+                        .param("status", "LOST"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Payment received, the book is now available.")));
+
+        assertFalse(borrowingService.existsById(borrowingId));
+        assertNotNull(updatedBookCopy);
+        assertEquals(CopyStatus.AVAILABLE, updatedBookCopy.getStatus());
+    }
+
+    @Test
+    void testReturnBookDamaged() throws Exception {
+        Long borrowingId = borrowing.getId();
+        BookCopy updatedBookCopy = bookCopyService.getBookCopyById(borrowing.getBookCopy().getId());
+
+        mockMvc.perform(post("/api/borrowings/return-book/{borrowingId}", borrowingId)
+                        .param("status", "DAMAGED"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("The book has been reported as damaged and is currently unavailable. " +
+                        "Book requires maintenance.")));
+
+        assertFalse(borrowingService.existsById(borrowingId));
+        assertNotNull(updatedBookCopy);
+        assertEquals(CopyStatus.DAMAGED, updatedBookCopy.getStatus());
+    }
+
+    @ReaderFunctionalityTest
+    @Test
+    void testGetReadersWithBorrowings() throws Exception {
+        mockMvc.perform(get("/api/readers/with-borrowings")
+                        .param("status", "BORROWED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @ReaderFunctionalityTest
+    @Test
+    void testGetOverdueReaders() throws Exception {
+        BorrowingDto updatedBorrowingDto1 = BorrowingDto.builder()
+                .returnDate(LocalDate.now().minusDays(1))
+                .build();
+
+        mockMvc.perform(patch("/api/borrowings/{borrowingId}", borrowing.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedBorrowingDto1)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/readers/overdue-readers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
+
+        BorrowingDto updatedBorrowingDto2 = BorrowingDto.builder()
+                .returnDate(LocalDate.now().plusDays(1))
+                .build();
+
+        mockMvc.perform(patch("/api/borrowings/{borrowingId}", borrowing.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedBorrowingDto2)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/readers/overdue-readers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }

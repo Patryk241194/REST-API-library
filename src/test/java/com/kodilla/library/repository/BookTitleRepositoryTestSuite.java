@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 @Transactional
-public class BookTitleRepositoryTestSuite {
+class BookTitleRepositoryTestSuite {
 
     @Autowired
     private BookTitleRepository bookTitleRepository;
@@ -57,6 +57,7 @@ public class BookTitleRepositoryTestSuite {
 
         // Then
         BookTitle updatedBookTitle = bookTitleRepository.findById(bookTitle.getId()).orElse(null);
+        assert updatedBookTitle != null;
         assertEquals(newTitle, updatedBookTitle.getTitle());
 
     }

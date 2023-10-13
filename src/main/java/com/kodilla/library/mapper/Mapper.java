@@ -3,20 +3,20 @@ package com.kodilla.library.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface Mapper<Dto, Entity> {
+public interface Mapper<D, E> {
 
-    Dto mapToDto(Entity entity);
+    D mapToDto(E e);
 
-    Entity mapToEntity(Dto dto);
+    E mapToEntity(D d);
 
-    default List<Dto> mapToDtoList(List<Entity> entityList) {
-        return entityList.stream()
+    default List<D> mapToDtoList(List<E> eList) {
+        return eList.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    default List<Entity> mapToEntityList(List<Dto> dtoList) {
-        return dtoList.stream()
+    default List<E> mapToEntityList(List<D> dList) {
+        return dList.stream()
                 .map(this::mapToEntity)
                 .collect(Collectors.toList());
     }

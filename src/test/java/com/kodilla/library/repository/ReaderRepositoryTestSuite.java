@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class ReaderRepositoryTestSuite {
+class ReaderRepositoryTestSuite {
 
     @Autowired
     private ReaderRepository readerRepository;
@@ -62,6 +62,7 @@ public class ReaderRepositoryTestSuite {
 
         // Then
         Reader updatedReader = readerRepository.findById(reader.getId()).orElse(null);
+        assert updatedReader != null;
         assertEquals(newCreatedDate, updatedReader.getRegistrationDate());
 
     }

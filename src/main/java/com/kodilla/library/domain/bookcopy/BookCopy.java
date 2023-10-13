@@ -26,7 +26,7 @@ public class BookCopy {
     @NotNull
     private CopyStatus status;
 
-    private int publicationYear;
+    private Integer publicationYear;
 
     @ManyToOne
     @JoinColumn(name = "TITLE_ID")

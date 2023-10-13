@@ -1,6 +1,7 @@
 package com.kodilla.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kodilla.library.annotations.BookTitleFunctionalityTest;
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
 import com.kodilla.library.dto.BookCopyDto;
@@ -21,8 +22,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @Transactional
@@ -38,7 +38,6 @@ class BookCopyControllerTestSuite {
     @Autowired
     private BookTitleService bookTitleService;
     private BookCopy bookCopy;
-    private BookCopyDto bookCopyDto;
 
     private BookTitleDto createSampleBookTitleDto() {
         return BookTitleDto.builder()
@@ -65,7 +64,7 @@ class BookCopyControllerTestSuite {
 
 
         Long id = bookTitleService.findLatestBookTitleId().getId();
-        bookCopyDto = createSampleBookCopyDto(id);
+        BookCopyDto bookCopyDto = createSampleBookCopyDto(id);
         mockMvc.perform(post("/api/bookcopies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(bookCopyDto)))
@@ -78,7 +77,7 @@ class BookCopyControllerTestSuite {
     }
 
     @Test
-    public void testCreateBookCopy() throws Exception {
+    void testCreateBookCopy() throws Exception {
         mockMvc.perform(get("/api/bookcopies"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -96,12 +95,14 @@ class BookCopyControllerTestSuite {
 
     @Test
     void testUpdateBookCopy() throws Exception {
-        bookCopy.setStatus(CopyStatus.BORROWED);
-        bookCopy.setPublicationYear(2022);
+        BookCopyDto updatedBookCopyDto = BookCopyDto.builder()
+                .status(CopyStatus.BORROWED)
+                .publicationYear(2022)
+                .build();
 
         mockMvc.perform(patch("/api/bookcopies/{bookCopyId}", bookCopy.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookCopy)))
+                        .content(objectMapper.writeValueAsString(updatedBookCopyDto)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/bookcopies/{bookCopyId}", bookCopy.getId()))
@@ -115,8 +116,13 @@ class BookCopyControllerTestSuite {
         mockMvc.perform(delete("/api/bookcopies/{bookCopyId}", bookCopy.getId()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/bookcopies"))
+    }
+
+    @BookTitleFunctionalityTest
+    @Test
+    void testGetAvailableCopiesCount() throws Exception {
+        mockMvc.perform(get("/api/booktitles/{bookTitleId}/available-copies-count", bookCopy.getTitle().getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().string("1"));
     }
 }

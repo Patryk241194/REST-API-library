@@ -1,11 +1,10 @@
 package com.kodilla.library.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
 import com.kodilla.library.domain.borrowing.Borrowing;
 import com.kodilla.library.domain.reader.Reader;
-import com.kodilla.library.error.bookcopy.BookCopyNotFoundException;
+import com.kodilla.library.dto.BorrowingDto;
 import com.kodilla.library.error.borrowing.BorrowingNotFoundException;
 import com.kodilla.library.error.reader.ReaderNotFoundException;
 import com.kodilla.library.repository.BookCopyRepository;
@@ -38,32 +37,31 @@ public class BorrowingService {
     }
 
     public void deleteBorrowingById(final Long borrowingId) {
-        if (!borrowingRepository.existsById(borrowingId)) {
+        if (!existsById(borrowingId)) {
             throw new BorrowingNotFoundException();
         }
         borrowingRepository.deleteById(borrowingId);
     }
 
-    public Borrowing updateBorrowing(Long borrowingId, JsonNode updates) {
+    public boolean existsById(final Long borrowingId) {
+        return borrowingRepository.existsById(borrowingId);
+    }
+
+    public Borrowing updateBorrowing(Long borrowingId, BorrowingDto updatedBorrowingDto) {
         Borrowing borrowing = borrowingRepository.findById(borrowingId)
                 .orElseThrow(BorrowingNotFoundException::new);
 
-        if (updates.has("bookCopyId")) {
-            borrowing.setBookCopy(bookCopyRepository.findById(updates.get("bookCopyId").asLong())
-                    .orElseThrow(BookCopyNotFoundException::new));
-        }
-
-        if (updates.has("readerId")) {
-            borrowing.setReader(readerRepository.findById(updates.get("readerId").asLong())
+        if (updatedBorrowingDto.getReaderId() != null) {
+            borrowing.setReader(readerRepository.findById(updatedBorrowingDto.getReaderId())
                     .orElseThrow(ReaderNotFoundException::new));
         }
 
-        if (updates.has("borrowingDate")) {
-            borrowing.setBorrowingDate(LocalDate.parse(updates.get("borrowingDate").asText()));
+        if (updatedBorrowingDto.getBorrowingDate() != null) {
+            borrowing.setBorrowingDate(updatedBorrowingDto.getBorrowingDate());
         }
 
-        if (updates.has("returnDate")) {
-            borrowing.setReturnDate(LocalDate.parse(updates.get("returnDate").asText()));
+        if (updatedBorrowingDto.getReturnDate() != null) {
+            borrowing.setReturnDate(updatedBorrowingDto.getReturnDate());
         }
 
         return borrowingRepository.save(borrowing);
@@ -92,14 +90,18 @@ public class BorrowingService {
         Borrowing borrowing = borrowingRepository.findById(borrowingId)
                 .orElseThrow(BorrowingNotFoundException::new);
 
-        if (borrowing.getReturnDate() != null) {
-            throw new IllegalStateException("The book has already been returned.");
+        boolean paymentRequired = false;
+
+        if (status == CopyStatus.AVAILABLE) {
+            throw new IllegalStateException("The book is available, it should not be borrowed.");
         }
 
         BookCopy bookCopy = borrowing.getBookCopy();
-        borrowing.setReturnDate(LocalDate.now());
 
-        if (status == null || status == CopyStatus.LOST) {
+        if (status == CopyStatus.LOST) {
+            status = CopyStatus.AVAILABLE;
+            paymentRequired = true;
+        } else if (status == null  || status == CopyStatus.BORROWED) {
             status = CopyStatus.AVAILABLE;
         } else if (status == CopyStatus.DAMAGED) {
             status = CopyStatus.DAMAGED;
@@ -107,15 +109,16 @@ public class BorrowingService {
         bookCopy.setStatus(status);
         borrowingRepository.save(borrowing);
         bookCopyRepository.save(bookCopy);
+        deleteBorrowingById(borrowing.getId());
 
-        return buildReturnMessage(status);
+        return buildReturnMessage(status, paymentRequired);
     }
 
-    private String buildReturnMessage(CopyStatus status) {
-        if (status == CopyStatus.LOST) {
-            return "Payment received, the book is now available.";
-        } else if (status == CopyStatus.DAMAGED) {
+    private String buildReturnMessage(CopyStatus status, boolean paymentRequired) {
+        if (status == CopyStatus.DAMAGED) {
             return "The book has been reported as damaged and is currently unavailable. Book requires maintenance.";
+        } else if (status == CopyStatus.AVAILABLE && paymentRequired) {
+            return "Payment received, the book is now available.";
         } else {
             return "The book has been returned and is available.";
         }

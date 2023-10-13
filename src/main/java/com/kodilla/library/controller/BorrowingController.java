@@ -1,6 +1,5 @@
 package com.kodilla.library.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
 import com.kodilla.library.domain.borrowing.Borrowing;
 import com.kodilla.library.dto.BorrowingDto;
@@ -59,7 +58,7 @@ public class BorrowingController {
     }
 
     @PatchMapping("/{borrowingId}")
-    public ResponseEntity<BorrowingDto> updateBorrowing(@PathVariable Long borrowingId, @RequestBody JsonNode borrowingUpdate) {
+    public ResponseEntity<BorrowingDto> updateBorrowing(@PathVariable Long borrowingId, @RequestBody BorrowingDto borrowingUpdate) {
         log.info("Updating BORROWING (id={})", borrowingId);
         Borrowing updatedBorrowing = service.updateBorrowing(borrowingId, borrowingUpdate);
         return ResponseEntity.ok(mapper.mapToDto(updatedBorrowing));

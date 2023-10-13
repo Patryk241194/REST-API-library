@@ -31,14 +31,6 @@ public class ReaderService {
         return readerRepository.findById(readerId).orElseThrow(ReaderNotFoundException::new);
     }
 
-    public Reader getReaderByBorrowingId(final Long borrowingId) {
-
-        Borrowing borrowing = borrowingRepository.findById(borrowingId)
-                .orElseThrow(BorrowingNotFoundException::new);
-
-        return readerRepository.findReaderByBorrowingsContains(borrowing);
-    }
-
     public List<Reader> getReadersWithBorrowings(CopyStatus status) {
         List<Reader> readers = new ArrayList<>();
         List<Borrowing> borrowings = borrowingRepository.findByBookCopy_Status(status);

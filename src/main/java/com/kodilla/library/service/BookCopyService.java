@@ -1,9 +1,9 @@
 package com.kodilla.library.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
 import com.kodilla.library.domain.booktitle.BookTitle;
+import com.kodilla.library.dto.BookCopyDto;
 import com.kodilla.library.error.bookcopy.BookCopyNotFoundException;
 import com.kodilla.library.error.booktitle.BookTitleNotFoundException;
 import com.kodilla.library.error.borrowing.BorrowingNotFoundException;
@@ -13,7 +13,7 @@ import com.kodilla.library.repository.BorrowingRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -42,7 +42,18 @@ public class BookCopyService {
 
     public void saveBookCopy(BookCopy bookCopy) {
         bookCopyRepository.save(bookCopy);
+
+        BookTitle bookTitle = bookTitleRepository.findById(bookCopy.getTitle().getId())
+                .orElseThrow(BookTitleNotFoundException::new);
+
+        if (bookTitle.getCopies() == null) {
+            bookTitle.setCopies(new ArrayList<>());
+        }
+
+        bookTitle.getCopies().add(bookCopy);
+        bookTitleRepository.save(bookTitle);
     }
+
 
     public void deleteBookCopyById(final Long bookCopyId) {
         if (!bookCopyRepository.existsById(bookCopyId)) {
@@ -51,25 +62,20 @@ public class BookCopyService {
         bookCopyRepository.deleteById(bookCopyId);
     }
 
-    public BookCopy updateBookCopy(Long bookCopyId, JsonNode updates) {
+    public BookCopy updateBookCopy(Long bookCopyId, BookCopyDto updatedBookCopyDto) {
         BookCopy bookCopy = bookCopyRepository.findById(bookCopyId)
                 .orElseThrow(BookCopyNotFoundException::new);
 
-        if (updates.has("titleId")) {
-            bookCopy.setTitle(bookTitleRepository.findById(updates.get("titleId").asLong())
-                    .orElseThrow(BookTitleNotFoundException::new));
+        if (updatedBookCopyDto.getStatus() != null) {
+            bookCopy.setStatus(updatedBookCopyDto.getStatus());
         }
 
-        if (updates.has("status")) {
-            bookCopy.setStatus(CopyStatus.valueOf(updates.get("status").asText()));
+        if (updatedBookCopyDto.getPublicationYear() != null) {
+            bookCopy.setPublicationYear(updatedBookCopyDto.getPublicationYear());
         }
 
-        if (updates.has("publicationYear")) {
-            bookCopy.setPublicationYear(updates.get("publicationYear").asInt());
-        }
-
-        if (updates.has("borrowingId")) {
-            bookCopy.setBorrowing(borrowingRepository.findById(updates.get("borrowingId").asLong())
+        if (updatedBookCopyDto.getBorrowingId() != null) {
+            bookCopy.setBorrowing(borrowingRepository.findById(updatedBookCopyDto.getBorrowingId())
                     .orElseThrow(BorrowingNotFoundException::new));
         }
 

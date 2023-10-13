@@ -1,14 +1,10 @@
 package com.kodilla.library.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
-import com.kodilla.library.domain.booktitle.BookTitle;
 import com.kodilla.library.dto.BookCopyDto;
 import com.kodilla.library.mapper.Mapper;
 import com.kodilla.library.service.BookCopyService;
-import com.kodilla.library.service.BookTitleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -27,7 +23,6 @@ public class BookCopyController {
 
     private final Mapper<BookCopyDto, BookCopy> mapper;
     private final BookCopyService service;
-    private final BookTitleService bookTitleService;
 
     @GetMapping
     public ResponseEntity<List<BookCopyDto>> getAllBookCopies() {
@@ -51,7 +46,7 @@ public class BookCopyController {
     }
 
     @PatchMapping("/{bookCopyId}")
-    public ResponseEntity<BookCopyDto> updateBookCopy(@PathVariable Long bookCopyId, @RequestBody JsonNode bookCopyUpdate) {
+    public ResponseEntity<BookCopyDto> updateBookCopy(@PathVariable Long bookCopyId, @RequestBody BookCopyDto bookCopyUpdate) {
         log.info("Updating BOOK COPY (id={})", bookCopyId);
         BookCopy updatedBookCopy = service.updateBookCopy(bookCopyId, bookCopyUpdate);
         return ResponseEntity.ok(mapper.mapToDto(updatedBookCopy));

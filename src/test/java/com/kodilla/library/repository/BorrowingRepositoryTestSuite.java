@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 @Transactional
-public class BorrowingRepositoryTestSuite {
+class BorrowingRepositoryTestSuite {
 
     @Autowired
     private BorrowingRepository borrowingRepository;
@@ -85,6 +85,7 @@ public class BorrowingRepositoryTestSuite {
 
         // Then
         Borrowing updatedBorrowing = borrowingRepository.findById(borrowing.getId()).orElse(null);
+        assert updatedBorrowing != null;
         assertEquals(newReturnDate, updatedBorrowing.getReturnDate());
 
     }
@@ -99,12 +100,6 @@ public class BorrowingRepositoryTestSuite {
         // Then
         assertFalse(borrowingRepository.existsById(id));
 
-    }
-
-    @Test
-    void cleanUp() {
-        readerRepository.deleteAll();
-        bookTitleRepository.deleteAll();
     }
 
 }
