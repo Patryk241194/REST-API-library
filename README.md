@@ -34,7 +34,7 @@
 This README file provides an overview of the project structure and a brief introduction to the REST API. For in-depth information on the available endpoints, their functionality, and sample requests and responses, refer to the relevant API documentation files in the "documentation" directory.
 
 ## Building and Running the Project
-1. lone the repository to your local machine.
+1. Clone the repository to your local machine.
 2. Open the project in your preferred Integrated Development Environment (IDE).
 3. Build and run the project using Gradle or your IDE's built-in tools.
 4. Access the API using the provided endpoints.
