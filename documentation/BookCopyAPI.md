@@ -10,6 +10,7 @@
 - **Sample Request Body:**
 ```json
 {
+  "titleId": 1,
   "status": "AVAILABLE",
   "publicationYear": 2020
 }

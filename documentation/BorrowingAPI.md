@@ -6,7 +6,7 @@
 - **Method:** POST
 - **Endpoint:** /api/borrowings/borrow-book
 - **Description:** Borrow a book.
-- **Sample Request:** http://localhost:8080/api/borrowings
+- **Sample Request:** http://localhost:8080/api/borrowings/borrow-book
 - **Sample Request Body:**
 ```json
 {
