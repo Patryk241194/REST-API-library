@@ -28,7 +28,7 @@ public class BookTitle {
     @OneToMany(
             targetEntity = BookCopy.class,
             mappedBy = "title",
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            cascade = CascadeType.REMOVE,
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )

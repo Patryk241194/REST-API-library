@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.kodilla.library.domain.bookcopy.CopyStatus;
 import com.kodilla.library.domain.borrowing.Borrowing;
 import com.kodilla.library.domain.reader.Reader;
-import com.kodilla.library.error.borrowing.BorrowingNotFoundException;
 import com.kodilla.library.error.reader.ReaderNotFoundException;
 import com.kodilla.library.repository.BorrowingRepository;
 import com.kodilla.library.repository.ReaderRepository;
@@ -13,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -45,10 +47,32 @@ public class ReaderService {
     public List<Reader> getReadersWithOverdueBorrowings() {
         LocalDate currentDate = LocalDate.now();
         List<Reader> readers = new ArrayList<>();
+
+        Map<Reader, List<Long>> overdueBorrowings = new HashMap<>();
+
         List<Borrowing> borrowings = borrowingRepository.findByReturnDateBeforeAndBookCopy_Status(currentDate, CopyStatus.BORROWED);
 
         for (Borrowing borrowing : borrowings) {
-            readers.add(borrowing.getReader());
+            Reader reader = borrowing.getReader();
+            if (reader != null) {
+                overdueBorrowings
+                        .computeIfAbsent(reader, k -> new ArrayList<>())
+                        .add(borrowing.getId());
+                readers.add(reader);
+            }
+        }
+
+        for (Reader reader : readers) {
+            List<Long> overdueBorrowingIds = overdueBorrowings.get(reader);
+            if (overdueBorrowingIds != null) {
+                List<Borrowing> readerBorrowings = reader.getBorrowings();
+                if (readerBorrowings != null) {
+                    List<Borrowing> overdueBorrowingsList = readerBorrowings.stream()
+                            .filter(borrowing -> overdueBorrowingIds.contains(borrowing.getId()))
+                            .collect(Collectors.toList());
+                    reader.setBorrowings(overdueBorrowingsList);
+                }
+            }
         }
 
         return readers;

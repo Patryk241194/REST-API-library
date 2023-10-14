@@ -39,7 +39,7 @@ public class Reader {
     @OneToMany(
             targetEntity = Borrowing.class,
             mappedBy = "reader",
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.REMOVE,
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )

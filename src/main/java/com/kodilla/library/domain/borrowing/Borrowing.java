@@ -3,6 +3,7 @@ package com.kodilla.library.domain.borrowing;
 import com.kodilla.library.domain.reader.Reader;
 import com.kodilla.library.domain.bookcopy.BookCopy;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -30,7 +31,7 @@ public class Borrowing {
     @JoinColumn(name = "READER_ID")
     private Reader reader;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne
     @JoinColumn(name = "BOOK_COPY_ID")
     private BookCopy bookCopy;
 

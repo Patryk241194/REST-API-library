@@ -41,9 +41,9 @@
 ### Get a list of readers with borrowings of a specific status
 
 - **Method:** GET
-- **Endpoint:** `/api/readers/with-borrowings?status=AVAILABLE`
+- **Endpoint:** `/api/readers/with-borrowings?status=BORROWED`
 - **Description:** Get a list of readers with borrowings of a specific status.
-- **Sample Request:** http://localhost:8080/api/readers/with-borrowings?status=AVAILABLE
+- **Sample Request:** http://localhost:8080/api/readers/with-borrowings?status=BORROWED
 - **Sample Response:**
 ```json
     {

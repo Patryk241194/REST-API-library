@@ -109,7 +109,7 @@ public class BorrowingService {
         bookCopy.setStatus(status);
         borrowingRepository.save(borrowing);
         bookCopyRepository.save(bookCopy);
-        deleteBorrowingById(borrowing.getId());
+        deleteBorrowingById(borrowingId);
 
         return buildReturnMessage(status, paymentRequired);
     }
