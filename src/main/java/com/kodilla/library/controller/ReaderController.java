@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,12 +31,14 @@ public class ReaderController {
         return ResponseEntity.ok(mapper.mapToDtoList(readers));
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/{readerId}")
     public ResponseEntity<ReaderDto> getReader(@PathVariable Long readerId) {
         log.info("Fetching READER(id={})", readerId);
         return ResponseEntity.ok(mapper.mapToDto(service.getReaderById(readerId)));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/with-borrowings")
     public ResponseEntity<List<ReaderDto>> getReadersWithBorrowings(@RequestParam CopyStatus status) {
         log.info("Fetching readers with borrowings of status: {}", status);
@@ -43,6 +46,7 @@ public class ReaderController {
         return ResponseEntity.ok(mapper.mapToDtoList(readers));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/overdue-readers")
     public ResponseEntity<List<ReaderDto>> getOverdueReaders() {
         log.info("Fetching readers with overdue borrowings");
@@ -50,6 +54,7 @@ public class ReaderController {
         return ResponseEntity.ok(mapper.mapToDtoList(readers));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> createReader(@RequestBody ReaderDto readerDto) {
         log.info("Creating a new READER: {}", readerDto);
@@ -58,6 +63,7 @@ public class ReaderController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{readerId}")
     public ResponseEntity<ReaderDto> updateReader(@PathVariable Long readerId, @RequestBody JsonNode readerUpdate) {
         log.info("Updating READER(id={})", readerId);
@@ -65,6 +71,7 @@ public class ReaderController {
         return ResponseEntity.ok(mapper.mapToDto(updatedReader));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{readerId}")
     public ResponseEntity<Void> deleteReader(@PathVariable Long readerId) {
         log.info("Deleting READER(id={})", readerId);
