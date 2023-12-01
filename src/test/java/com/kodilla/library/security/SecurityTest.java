@@ -1,41 +1,70 @@
 package com.kodilla.library.security;
 
+import com.kodilla.library.dto.ReaderDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import java.time.LocalDate;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 class SecurityTest {
 
     @Autowired
-    private WebClient webClient;
+    private WebTestClient webTestClient;
 
     @Test
     @WithMockUser(username = "user", roles = "USER")
-    public void testUserAccess() {
-        webClient.get()
+    public void shouldReturnOkForUserOnGetReadersEndpoint() {
+        webTestClient.get()
                 .uri("/api/readers")
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+                .exchange()
+                .expectStatus().isOk();
     }
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    public void testAdminAccess() {
-        try {
-            webClient.post()
-                    .uri("/api/readers")
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
-        } catch (WebClientResponseException e) {
-            assertThat(e.getRawStatusCode()).isEqualTo(403);
-        }
+    public void shouldReturnOkForAdminOnGetReadersEndpoint() {
+        webTestClient.get()
+                .uri("/api/readers")
+                .exchange()
+                .expectStatus().isOk();
     }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void shouldReturnOkForAdminOnPostReaderEndpoint() {
+        ReaderDto readerDto = ReaderDto.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .registrationDate(LocalDate.of(2023, 9, 29))
+                .build();
+
+        webTestClient.post()
+                .uri("/api/readers")
+                .bodyValue(readerDto)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = "USER")
+    public void shouldReturnForbiddenForUserOnPostReaderEndpoint() {
+        ReaderDto readerDto = ReaderDto.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .registrationDate(LocalDate.of(2023, 9, 29))
+                .build();
+
+        webTestClient.post()
+                .uri("/api/readers")
+                .bodyValue(readerDto)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
 }

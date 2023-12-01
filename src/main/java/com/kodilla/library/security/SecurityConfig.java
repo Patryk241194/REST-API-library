@@ -3,15 +3,11 @@ package com.kodilla.library.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -19,35 +15,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/api/readers/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/readers/**").authenticated()
-                .antMatchers(HttpMethod.PATCH, "/api/readers/**").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/api/readers/**").authenticated()
-                .anyRequest().authenticated()
+        http.csrf().disable()
+                .authorizeRequests()
+                .mvcMatchers(HttpMethod.GET, "/api/readers/**").hasAnyRole("ADMIN", "USER")
+                .mvcMatchers(HttpMethod.POST, "/api/readers/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.PATCH, "/api/readers/**").hasRole("ADMIN")
+                .mvcMatchers(HttpMethod.DELETE, "/api/readers/**").hasRole("ADMIN")
+                .anyRequest()
+                .fullyAuthenticated()
                 .and()
                 .httpBasic();
     }
 
-    @Bean
-    protected PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication()
+                .withUser("admin")
+                .password("adminpassword")
+                .roles("ADMIN");
+
+        auth.inMemoryAuthentication()
+                .withUser("user")
+                .password("password")
+                .roles("USER");
     }
 
     @Bean
-    protected UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("user")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("adminpassword"))
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user, admin);
+    public static NoOpPasswordEncoder passwordEncoder() {
+        return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
     }
+
 }
